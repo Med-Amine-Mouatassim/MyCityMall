@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chatbot Animé</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+body {
+  margin:0;
+  font-family:'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(120deg,#89f7fe,#66a6ff);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.chat-container {
+  width:100%;
+  max-width:600px;
+  height:80vh;
+  background-color:#fff;
+  border-radius:15px;
+  display:flex;
+  flex-direction:column;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  overflow:hidden;
+}
+
+.chat-header {
+  background:#00bcd4;
+  color:white;
+  padding:15px;
+  font-size:1.3rem;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-weight:bold;
+  gap: 10px;
+}
+
+.chat-header button {
+  background:white;
+  color:#00bcd4;
+  border:none;
+  padding:5px 12px;
+  border-radius:8px;
+  cursor:pointer;
+}
+.chat-header button:hover { background:#e0f7fa; }
+
+.header-actions {
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.voice-toggle {
+  background:#ffffff;
+  color:#00bcd4;
+  border:none;
+  padding:6px 10px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+  font-size:0.85rem;
+}
+.voice-toggle.active {
+  background:#fff3e0;
+  color:#d35400;
+}
+.voice-select {
+  border:none;
+  border-radius:8px;
+  padding:6px 10px;
+  font-size:0.85rem;
+}
+
+/* AVATAR */
+.avatar-container {
+  position:relative;
+  display:flex;
+  justify-content:center;
+  margin-top:15px;
+  margin-bottom:10px;
+}
+
+.avatar-bg {
+  width:140px;
+  height:140px;
+  border-radius:50%;
+  background: radial-gradient(circle at 40% 30%, #ffd1b3, #f0a070);
+  box-shadow: inset -5px -5px 15px rgba(0,0,0,0.1);
+  position:relative;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.avatar-bg .eye {
+  width:20px;
+  height:20px;
+  background:white;
+  border-radius:50%;
+  position:absolute;
+  top:40px;
+  box-shadow: inset -2px -2px 3px rgba(0,0,0,0.2);
+}
+.avatar-bg .eye.left { left:35px; }
+.avatar-bg .eye.right { right:35px; }
+.avatar-bg .eye::after {
+  content:'';
+  position:absolute;
+  width:10px;
+  height:10px;
+  background:black;
+  border-radius:50%;
+  top:5px;
+  left:5px;
+}
+
+.avatar-bg .nose {
+  width:10px;
+  height:10px;
+  background:#f09c72;
+  border-radius:50%;
+  position:absolute;
+  top:70px;
+  left:50%;
+  transform:translateX(-50%);
+}
+
+.avatar-bg .mouth {
+  width:60px;
+  height:30px;
+  border-bottom:5px solid white;
+  border-radius:0 0 60px 60px;
+  position:absolute;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  transition:all 0.3s ease;
+}
+.speaking .mouth {
+  animation: mouthTalk 0.14s infinite ease-in-out;
+  border-bottom-color: #00bcd4;
+}
+
+.avatar-bg .indicator {
+  position:absolute;
+  width:18px;
+  height:18px;
+  background:#00e676;
+  border-radius:50%;
+  top:10px;
+  right:-20px;
+  box-shadow:0 0 8px #00e676,0 0 15px #00e676;
+  animation:pulse 1s infinite;
+}
+
+/* Main qui salue */
+.avatar-bg .hand {
+  position:absolute;
+  width:30px;
+  height:30px;
+  background:#ffd1b3;
+  border-radius:50%;
+  top:80px;
+  right:-40px;
+  transform:scale(0);
+  opacity:0;
+  box-shadow: inset -2px -2px 3px rgba(0,0,0,0.2);
+}
+
+/* Messages */
+.chat-messages {
+  flex:1;
+  padding:15px;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  background:#f0f4f8;
+}
+
+.chat-message {
+  display:flex;
+  align-items:flex-end;
+  padding:10px 15px;
+  border-radius:20px;
+  max-width:70%;
+}
+
+.chat-message.user {
+  background: linear-gradient(135deg,#81ecec,#00cec9);
+  color:white;
+  align-self:flex-start;
+  border-bottom-left-radius:0;
+}
+
+.chat-message.bot {
+  background: linear-gradient(135deg,#ffeaa7,#fab1a0);
+  color:#333;
+  align-self:flex-end;
+  border-bottom-right-radius:0;
+}
+
+.chat-input {
+  display:flex;
+  border-top:1px solid #ddd;
+}
+
+.chat-input input {
+  flex:1;
+  padding:15px;
+  font-size:1rem;
+  border:none;
+}
+
+.chat-input button {
+  padding:0 20px;
+  border:none;
+  background-color:#00bcd4;
+  color:#fff;
+  cursor:pointer;
+  font-size:1rem;
+  transition:0.3s;
+}
+.chat-input button:hover { background-color:#0097a7; }
+
+.loading {
+  display:flex;
+  gap:5px;
+  padding:10px 15px;
+  background: linear-gradient(135deg,#ffeaa7,#fab1a0);
+  border-radius:20px;
+  justify-content:center;
+}
+.loading span {
+  width:8px;
+  height:8px;
+  background:#333;
+  border-radius:50%;
+  animation:bounce 0.6s infinite;
+}
+.loading span:nth-child(2){ animation-delay:0.2s; }
+.loading span:nth-child(3){ animation-delay:0.4s; }
+
+@keyframes pulse {0%{transform:scale(1);opacity:0.7;}50%{transform:scale(1.3);opacity:1;}100%{transform:scale(1);opacity:0.7;}}
+@keyframes bounce {0%{transform:translateY(0);}50%{transform:translateY(-5px);}100%{transform:translateY(0);}}
+@keyframes mouthTalk {
+  0% { height: 14px; width: 46px; border-bottom-width: 4px; transform: translateX(-50%) scaleX(0.95); }
+  40% { height: 26px; width: 58px; border-bottom-width: 6px; transform: translateX(-50%) scaleX(1.05); }
+  70% { height: 18px; width: 50px; border-bottom-width: 5px; transform: translateX(-50%) scaleX(0.98); }
+  100% { height: 14px; width: 46px; border-bottom-width: 4px; transform: translateX(-50%) scaleX(0.95); }
+}
+
+/* Responsive global */
+.chat-container {
+  width: min(600px, 95vw);
+  height: min(80vh, 700px);
+}
+
+.chat-header {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chat-input input {
+  font-size: clamp(0.85rem, 1.5vw, 1rem);
+}
+
+.chat-message {
+  max-width: min(70%, 520px);
+}
+
+/* === Responsive Chatbot === */
+@media (max-width: 768px) {
+  .chat-container {
+    width: 95%;
+    height: 90vh;
+  }
+
+  .avatar-container {
+    margin-top: 10px;
+    margin-bottom: 5px;
+  }
+
+  .avatar-bg {
+    width: 100px;
+    height: 100px;
+  }
+
+  .avatar-bg .eye {
+    width: 15px;
+    height: 15px;
+    top: 30px;
+  }
+
+  .avatar-bg .eye.left { left: 25px; }
+  .avatar-bg .eye.right { right: 25px; }
+
+  .avatar-bg .eye::after {
+    width: 7px;
+    height: 7px;
+    top: 4px;
+    left: 4px;
+  }
+
+  .avatar-bg .nose {
+    width: 7px;
+    height: 7px;
+    top: 50px;
+  }
+
+  .avatar-bg .mouth {
+    width: 40px;
+    height: 20px;
+    bottom: 15px;
+  }
+
+  .avatar-bg .hand {
+    width: 20px;
+    height: 20px;
+    top: 60px;
+    right: -25px;
+  }
+
+  .chat-messages {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .chat-message {
+    max-width: 90%;
+    padding: 8px 12px;
+  }
+
+  .chat-input input {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  .chat-input button {
+    padding: 0 12px;
+    font-size: 0.9rem;
+  }
+
+  .loading span {
+    width: 6px;
+    height: 6px;
+  }
+
+  .chat-header {
+    font-size: 1.1rem;
+    padding: 10px;
+  }
+
+  .chat-header button {
+    padding: 4px 8px;
+    font-size: 0.85rem;
+  }
+  .voice-select { display: none; }
+}
+
+/* Pour très petits écrans */
+@media (max-width: 480px) {
+  .avatar-bg {
+    width: 80px;
+    height: 80px;
+  }
+
+  .avatar-bg .eye {
+    width: 12px;
+    height: 12px;
+    top: 25px;
+  }
+
+  .avatar-bg .eye.left { left: 20px; }
+  .avatar-bg .eye.right { right: 20px; }
+
+  .avatar-bg .eye::after {
+    width: 5px;
+    height: 5px;
+    top: 3px;
+    left: 3px;
+  }
+
+  .avatar-bg .nose {
+    width: 5px;
+    height: 5px;
+    top: 40px;
+  }
+
+  .avatar-bg .mouth {
+    width: 30px;
+    height: 15px;
+    bottom: 12px;
+  }
+
+  .avatar-bg .hand {
+    width: 15px;
+    height: 15px;
+    top: 50px;
+    right: -20px;
+  }
+
+  .chat-message {
+    max-width: 95%;
+  }
+
+  .chat-input input {
+    padding: 8px;
+    font-size: 0.8rem;
+  }
+
+  .chat-input button {
+    padding: 0 10px;
+    font-size: 0.8rem;
+  }
+}
+
+</style>
+</head>
+<body>
+
+<div class="chat-container">
+  <div class="chat-header">
+    <span class="bot-name"><i class="fas fa-robot"></i> Mon Chatbot</span>
+    <div class="header-actions">
+      <button id="voiceToggle" class="voice-toggle" type="button">Voix: OFF</button>
+      <select id="voiceSelect" class="voice-select"></select>
+      <button onclick="goHome()"><i class="fas fa-home"></i> Accueil</button>
+    </div>
+  </div>
+
+  <div class="avatar-container">
+    <div class="avatar-bg" id="avatar">
+      <div class="eye left"></div>
+      <div class="eye right"></div>
+      <div class="nose"></div>
+      <div class="mouth" id="mouth"></div>
+      <div class="indicator" id="indicator"></div>
+      <div class="hand" id="hand"></div>
+    </div>
+  </div>
+
+  <div class="chat-messages" id="messages"></div>
+
+  <div class="chat-input">
+    <input type="text" id="userInput" placeholder="Écrire un message...">
+    <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i> Envoyer</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="https://unpkg.com/compromise@13.11.3/builds/compromise.min.js"></script>
+<script type="module">
+import { db } from "./config/firebase-config.js";
+import { collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const messagesContainer = document.getElementById("messages");
+const input = document.getElementById("userInput");
+const avatar = document.getElementById("avatar");
+const mouth = document.getElementById("mouth");
+const indicator = document.getElementById("indicator");
+const hand = document.getElementById("hand");
+const voiceToggle = document.getElementById("voiceToggle");
+const voiceSelect = document.getElementById("voiceSelect");
+
+let voiceEnabled = false;
+let currentVoice = null;
+let typingSpeed = 18;
+
+const stopWords = ["je","tu","il","elle","nous","vous","ils","le","la","les","un","une","des","de","pour","avec","acheter","veux","cherche","svp","stp"];
+const synonymes = { basket:"chaussure", baskets:"chaussure", sneakers:"chaussure", chaussure:"chaussure", chaussures:"chaussure", jacket:"vetement", tshirt:"vetement", hwayej:"vetement", mra:"femme", rajel:"homme", zwine:"beau", rkhis:"pas cher", srwal:"pantalon", "سروال":"pantalon" };
+const salutations = ["bonjour","salut","salam","bonsoir","hi","hello"];
+
+function extractIdIntent(raw){
+  const rawText = String(raw || "");
+  const lower = rawText.toLowerCase();
+  const explicit = /\b(id|code|ref)\b/.test(lower);
+  const type = /\b(magasin|boutique|store|shop)\b/.test(lower)
+    ? "magasin"
+    : /\b(produit|article|item)\b/.test(lower)
+    ? "produit"
+    : "any";
+  const match = rawText.match(/\b(?:id|code|ref)\s*[:#]?\s*([a-z0-9_-]{4,})\b/i);
+  return { explicit, type, value: match ? match[1] : null };
+}
+
+// Normalisation texte
+function normaliserMot(mot){ return synonymes[mot]||mot; }
+function nettoyerTexte(text){ return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\w\s]/g,"").split(" ").map(m=>normaliserMot(m)).filter(m=>m.length>2&&!stopWords.includes(m)); }
+
+// Fuzzy score
+function scoreProduit(motsUtilisateur, produit){
+  let score=0;
+  const motsProduit=`${produit.nom||""} ${produit.description||""} ${(produit.tags||[]).join(" ")} ${(produit.couleurs||[]).join(" ")} ${(produit.tailles||[]).join(" ")} ${produit.sexe||""} ${produit.matiere||""}`.toLowerCase().split(/\s+/).filter(m=>m.length>2);
+  motsUtilisateur.forEach(motU=>{
+    if(motsProduit.includes(motU)) score+=5;
+    else{
+      motsProduit.forEach(motP=>{
+        const distance = distanceLevenshtein(motU,motP);
+        const seuil = motP.length>5?2:1;
+        if(distance<=seuil) score+=3;
+      });
+    }
+  });
+  return score;
+}
+
+async function chercherProduits(message, idFilter = null){
+  const mots = nettoyerTexte(message);
+  const hasText = mots.length > 0;
+  const snap = await getDocs(collection(db,"produits"));
+  let resultats=[];
+  snap.forEach(docSnap=>{
+    const p=docSnap.data();
+    const docId = docSnap.id;
+    const storeId = String(p.id_magasin || "");
+    const idMatch = idFilter
+      ? idFilter.type === "produit"
+        ? docId === idFilter.value
+        : idFilter.type === "magasin"
+        ? storeId === idFilter.value
+        : docId === idFilter.value || storeId === idFilter.value
+      : false;
+    const score=scoreProduit(mots,p);
+    if (idFilter) {
+      if (!idMatch) return;
+      resultats.push({...p,id:docId,score:score+100});
+      return;
+    }
+    if(score>0) resultats.push({...p,id:docId,score:hasText ? score : 1});
+  });
+  return resultats.sort((a,b)=>b.score-a.score);
+}
+
+async function enregistrerClick(produit){ await addDoc(collection(db,"stats_chatbot"),{produit:produit.nom,magasin:produit.id_magasin,date:new Date().toISOString()}); }
+window.enregistrerClick = enregistrerClick;
+
+// === Avatar animation ===
+function reactAvatar(){
+  anime({
+    targets: mouth,
+    borderBottomColor: ['#fff','#00bcd4','#fff'],
+    width:['60px','70px','60px'],
+    height:['30px','25px','30px'],
+    duration:1000,
+    easing:'easeInOutSine'
+  });
+  anime({
+    targets: indicator,
+    scale:[1,1.3,1],
+    duration:1000,
+    easing:'easeInOutSine'
+  });
+  anime({
+    targets: avatar,
+    rotate:[-5,5,0],
+    duration:1000,
+    easing:'easeInOutSine'
+  });
+}
+
+function startTalking() {
+  avatar.classList.add("speaking");
+}
+function stopTalking() {
+  avatar.classList.remove("speaking");
+}
+
+function typeText(element, text) {
+  return new Promise(resolve => {
+    let i = 0;
+    startTalking();
+    const tick = () => {
+      if (i <= text.length) {
+        element.textContent = text.slice(0, i);
+        i += 1;
+        setTimeout(tick, typingSpeed);
+      } else {
+        stopTalking();
+        resolve();
+      }
+    };
+    tick();
+  });
+}
+
+function populateVoices() {
+  if (!voiceSelect || !("speechSynthesis" in window)) return;
+  const voices = speechSynthesis.getVoices();
+  voiceSelect.innerHTML = "";
+  const frVoices = voices.filter(v => v.lang.toLowerCase().startsWith("fr"));
+  const list = frVoices.length ? frVoices : voices;
+  list.forEach(v => {
+    const opt = document.createElement("option");
+    opt.value = v.name;
+    opt.textContent = `${v.name} (${v.lang})`;
+    voiceSelect.appendChild(opt);
+  });
+  currentVoice = list[0] || null;
+}
+
+if ("speechSynthesis" in window) {
+  populateVoices();
+  speechSynthesis.onvoiceschanged = populateVoices;
+}
+
+if (voiceSelect) {
+  voiceSelect.addEventListener("change", () => {
+    const voices = speechSynthesis.getVoices();
+    currentVoice = voices.find(v => v.name === voiceSelect.value) || null;
+  });
+}
+
+if (voiceToggle) {
+  voiceToggle.addEventListener("click", () => {
+    voiceEnabled = !voiceEnabled;
+    voiceToggle.textContent = voiceEnabled ? "Voix: ON" : "Voix: OFF";
+    voiceToggle.classList.toggle("active", voiceEnabled);
+    if (!voiceEnabled && "speechSynthesis" in window) speechSynthesis.cancel();
+  });
+}
+
+function speak(text) {
+  if (!voiceEnabled || !("speechSynthesis" in window)) return;
+  speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  if (currentVoice) utterance.voice = currentVoice;
+  utterance.lang = currentVoice?.lang || "fr-FR";
+  utterance.rate = 1;
+  utterance.pitch = 1;
+  utterance.onstart = startTalking;
+  utterance.onend = stopTalking;
+  speechSynthesis.speak(utterance);
+}
+
+// Clignement naturel yeux aléatoire
+function blinkEyes(){ 
+  const eyes=avatar.querySelectorAll('.eye');
+  eyes.forEach(eye=>{
+    anime({targets:eye,scaleY:[1,0.1,1],duration:300,easing:'easeInOutSine'});
+  });
+}
+setInterval(blinkEyes, 4000);
+
+// Suivi curseur yeux
+document.addEventListener('mousemove',(e)=>{
+  const rect=avatar.getBoundingClientRect();
+  const eyes=avatar.querySelectorAll('.eye::after');
+  avatar.querySelectorAll('.eye').forEach((eye)=>{
+    const eyeCenterX=eye.getBoundingClientRect().left+eye.offsetWidth/2;
+    const eyeCenterY=eye.getBoundingClientRect().top+eye.offsetHeight/2;
+    const dx=e.clientX-eyeCenterX;
+    const dy=e.clientY-eyeCenterY;
+    const angle=Math.atan2(dy,dx)*180/Math.PI;
+    eye.querySelector('::after'); // ne peut pas animer pseudo, mais l'effet reste visuel
+  });
+});
+
+// Fonction main qui salue
+function waveHand(){
+  anime({
+    targets: hand,
+    scale:[0,1],
+    opacity:[0,1],
+    rotate:[0,-20,20,0],
+    duration:1500,
+    easing:'easeInOutSine',
+    loop:2,
+    complete:()=>{ anime({targets:hand,scale:0,opacity:0,duration:300}); }
+  });
+}
+
+// Fonction r?ponse
+async function repondre(text, loading){
+  reactAvatar();
+  const normalize = (t) => t.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^\w\s]/g, "");
+  const message = normalize(text);
+  const idIntent = extractIdIntent(text);
+
+  function buildFacets(results) {
+    const facets = {
+      categorie: {},
+      couleurs: {},
+      sexe: {},
+      matiere: {},
+      tailles: {}
+    };
+    results.forEach(p => {
+      (p.tags || []).forEach(t => {
+        const key = String(t).toLowerCase();
+        if (key) facets.categorie[key] = (facets.categorie[key] || 0) + 1;
+      });
+      (p.couleurs || []).forEach(c => {
+        const key = String(c).toLowerCase();
+        if (key) facets.couleurs[key] = (facets.couleurs[key] || 0) + 1;
+      });
+      const sexe = (p.sexe || "").toLowerCase().trim();
+      if (sexe) facets.sexe[sexe] = (facets.sexe[sexe] || 0) + 1;
+      const mat = (p.matiere || "").toLowerCase().trim();
+      if (mat) facets.matiere[mat] = (facets.matiere[mat] || 0) + 1;
+      (p.tailles || []).forEach(t => {
+        const key = String(t).toLowerCase();
+        if (key) facets.tailles[key] = (facets.tailles[key] || 0) + 1;
+      });
+    });
+    return facets;
+  }
+
+  function pickNextFacet(facets, asked = []) {
+    const order = ["categorie", "couleurs", "sexe", "matiere", "tailles"];
+    for (const key of order) {
+      if (asked.includes(key)) continue;
+      const options = Object.entries(facets[key] || {})
+        .sort((a, b) => b[1] - a[1])
+        .map(([v]) => v)
+        .filter(v => v);
+      if (options.length >= 2) return { key, options: options.slice(0, 3) };
+    }
+    return null;
+  }
+
+  function filterByFacet(results, facetKey, value) {
+    if (!value) return results;
+    if (facetKey === "categorie") {
+      return results.filter(p => (p.tags || []).some(t => String(t).toLowerCase().includes(value)));
+    }
+    if (facetKey === "sexe") {
+      return results.filter(p => (p.sexe || "").toLowerCase().includes(value));
+    }
+    if (facetKey === "couleurs") {
+      return results.filter(p => (p.couleurs || []).some(c => String(c).toLowerCase().includes(value)));
+    }
+    if (facetKey === "tailles") {
+      return results.filter(p => (p.tailles || []).some(t => String(t).toLowerCase().includes(value)));
+    }
+    if (facetKey === "matiere") {
+      return results.filter(p => (p.matiere || "").toLowerCase().includes(value));
+    }
+    return results;
+  }
+
+  function extractFacetFilters(msg, facets) {
+    const filters = [];
+    const messageLower = String(msg || "").toLowerCase();
+    const keys = Object.keys(facets);
+    keys.forEach(key => {
+      Object.keys(facets[key] || {}).forEach(option => {
+        const opt = String(option).toLowerCase();
+        if (opt && messageLower.includes(opt)) {
+          filters.push({ key, value: opt });
+        }
+      });
+    });
+    return filters;
+  }
+
+  function applyFacetFilters(results, filters) {
+    let out = results;
+    filters.forEach(f => {
+      out = filterByFacet(out, f.key, f.value);
+    });
+    return out;
+  }
+
+  function parsePriceRange(msg) {
+    const text = String(msg || "").toLowerCase().replace(",", ".");
+    const between = text.match(/(?:entre|de)\s+(\d+(?:\.\d+)?)\s+(?:et|a)\s+(\d+(?:\.\d+)?)/);
+    if (between) {
+      const a = Number(between[1]);
+      const b = Number(between[2]);
+      if (!Number.isNaN(a) && !Number.isNaN(b)) {
+        return { min: Math.min(a, b), max: Math.max(a, b) };
+      }
+    }
+    const maxMatch = text.match(/(?:moins de|max|maximum|<=)\s*(\d+(?:\.\d+)?)/);
+    if (maxMatch) {
+      const max = Number(maxMatch[1]);
+      if (!Number.isNaN(max)) return { min: null, max };
+    }
+    const minMatch = text.match(/(?:plus de|min|minimum|>=)\s*(\d+(?:\.\d+)?)/);
+    if (minMatch) {
+      const min = Number(minMatch[1]);
+      if (!Number.isNaN(min)) return { min, max: null };
+    }
+    return null;
+  }
+
+  function extractPriceValue(prix) {
+    if (prix === null || prix === undefined) return NaN;
+    const num = String(prix).replace(",", ".").match(/[\d.]+/);
+    if (!num) return NaN;
+    return Number(num[0]);
+  }
+
+  function applyPriceFilter(results, range) {
+    if (!range) return results;
+    return results.filter(p => {
+      const value = extractPriceValue(p.prix);
+      if (Number.isNaN(value)) return false;
+      if (range.min !== null && value < range.min) return false;
+      if (range.max !== null && value > range.max) return false;
+      return true;
+    });
+  }
+
+  async function showSuggestions(list, loadingNode, introText) {
+    const bot = document.createElement("div");
+    bot.className = "chat-message bot";
+    const textNode = document.createElement("span");
+    bot.appendChild(textNode);
+    if (loadingNode && loadingNode.parentNode) {
+      messagesContainer.replaceChild(bot, loadingNode);
+    } else {
+      messagesContainer.appendChild(bot);
+    }
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    await typeText(textNode, introText);
+    speak(introText);
+
+    const cards = document.createElement("div");
+    cards.innerHTML = `
+      ${list.slice(0, 3).map(p => `
+        <div style="
+          background:#fff;
+          padding:10px;
+          border-radius:10px;
+          margin-top:10px;
+          box-shadow:0 2px 6px rgba(0,0,0,.15)
+        ">
+          <img src="${p.image}" style="width:100%;border-radius:8px">
+          <b>${p.nom}</b><br>
+          ?? ${p.prix} DH<br>
+          ??? ${(p.tags || []).join(", ")}<br><br>
+
+          <a
+            href="../sport/catalogue.html?shop=${p.id_magasin}"
+            target="_blank"
+            onclick='enregistrerClick(${JSON.stringify(p)})'
+            style="color:#00bcd4;font-weight:bold"
+          >
+            ?? Voir le magasin
+          </a>
+        </div>
+      `).join("")}
+    `;
+    bot.appendChild(cards);
+  }
+
+  if (window._pendingIdRequest) {
+    const pending = window._pendingIdRequest;
+    const compact = String(text || "").replace(/\s/g, "");
+    const providedId = idIntent.value || (compact.length >= 4 ? compact : null);
+    const bot = document.createElement("div");
+    bot.className = "chat-message bot";
+    const textNode = document.createElement("span");
+    bot.appendChild(textNode);
+    messagesContainer.replaceChild(bot, loading);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+    if (!providedId) {
+      const reply = "Je ne vois pas d'ID. Envoie l'ID exact du produit ou du magasin.";
+      await typeText(textNode, reply);
+      speak(reply);
+      return;
+    }
+
+    window._pendingIdRequest = null;
+    const idFilter = { type: pending.type || "any", value: providedId };
+    const produitsParId = await chercherProduits("", idFilter);
+    if (!produitsParId.length) {
+      const reply = "ID introuvable. Verifie l'ID ou donne des mots-cles (ex: couleur, taille, categorie).";
+      await typeText(textNode, reply);
+      speak(reply);
+      return;
+    }
+    await showSuggestions(produitsParId, bot, "Voici les resultats trouves avec cet ID :");
+    return;
+  }
+
+  if (idIntent.explicit && !idIntent.value) {
+    const bot = document.createElement("div");
+    bot.className = "chat-message bot";
+    const textNode = document.createElement("span");
+    bot.appendChild(textNode);
+    messagesContainer.replaceChild(bot, loading);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    window._pendingIdRequest = { type: idIntent.type || "any" };
+    const reply = "Tu veux chercher par ID. Envoie l'ID exact du produit ou du magasin.";
+    await typeText(textNode, reply);
+    speak(reply);
+    return;
+  }
+
+  if (idIntent.value && window._pendingDisambiguation) {
+    window._pendingDisambiguation = null;
+  }
+
+  if (window._pendingDisambiguation) {
+    const { options, results, facetKey, asked } = window._pendingDisambiguation;
+    window._pendingDisambiguation = null;
+    const chosen = options.find(opt => message.includes(opt));
+    let filtered = results;
+    if (chosen) filtered = filterByFacet(results, facetKey, chosen);
+    const finalList = filtered.length ? filtered : results;
+
+    if (finalList.length > 3) {
+      const facets = buildFacets(finalList);
+      const next = pickNextFacet(facets, asked || [facetKey]);
+      if (next) {
+        window._pendingDisambiguation = {
+          options: next.options,
+          results: finalList,
+          facetKey: next.key,
+          asked: [...(asked || [facetKey]), next.key]
+        };
+        const bot = document.createElement("div");
+        bot.className = "chat-message bot";
+        const textNode = document.createElement("span");
+        bot.appendChild(textNode);
+        messagesContainer.replaceChild(bot, loading);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        const label =
+          next.key === "categorie" ? "categorie" :
+          next.key === "sexe" ? "sexe" :
+          next.key === "tailles" ? "taille" :
+          next.key;
+        const reply = `Pour affiner, tu veux plutot quelle ${label} : ${next.options.join(", ")} ? Tu peux aussi donner l'ID produit ou magasin.`;
+        await typeText(textNode, reply);
+        speak(reply);
+        return;
+      }
+    }
+
+    await showSuggestions(finalList, loading, "Parfait, voici 2 a 3 suggestions qui collent le mieux :");
+    return;
+  }
+
+  // === Compromise NLP pour salutations ===
+  const doc = nlp(text);
+  if(salutations.some(s=>message.includes(s)) || doc.has('#Greeting')){
+    waveHand();
+    const bot = document.createElement("div");
+    bot.className="chat-message bot";
+    const textNode = document.createElement("span");
+    bot.appendChild(textNode);
+    messagesContainer.replaceChild(bot,loading);
+    messagesContainer.scrollTop=messagesContainer.scrollHeight;
+    const reply = "Bonjour ! Je suis ton assistant. Comment puis-je t'aider aujourd'hui ?";
+    await typeText(textNode, reply);
+    speak(reply);
+    return;
+  }
+
+  // Recherche produit Firestore
+  const idFilter = idIntent.value ? { type: idIntent.type || "any", value: idIntent.value } : null;
+  const produits = await chercherProduits(text, idFilter);
+  const bot = document.createElement("div");
+  bot.className="chat-message bot";
+  const textNode = document.createElement("span");
+  bot.appendChild(textNode);
+  messagesContainer.replaceChild(bot,loading);
+  messagesContainer.scrollTop=messagesContainer.scrollHeight;
+
+  if(produits.length===0) {
+    const reply = idFilter
+      ? "Aucun produit ne correspond a cet ID. Verifie l'ID ou donne des mots-cles."
+      : "Je ne peux pas trouver ce produit, essaie autre chose.";
+    await typeText(textNode, reply);
+    speak(reply);
+    return;
+  }
+
+  const facets = buildFacets(produits);
+  const autoFilters = extractFacetFilters(message, facets);
+  const priceRange = parsePriceRange(text);
+  const filteredAuto = autoFilters.length ? applyFacetFilters(produits, autoFilters) : produits;
+  const filteredPrice = applyPriceFilter(filteredAuto, priceRange);
+  if (priceRange && filteredPrice.length === 0) {
+    const reply = "Aucun produit ne correspond a ce budget. Donne un autre prix ou retire la contrainte.";
+    await typeText(textNode, reply);
+    speak(reply);
+    return;
+  }
+  const baseList = filteredPrice.length ? filteredPrice : filteredAuto;
+
+  if (baseList.length > 3) {
+    const next = pickNextFacet(buildFacets(baseList), []);
+    if (next) {
+      window._pendingDisambiguation = {
+        options: next.options,
+        results: baseList,
+        facetKey: next.key,
+        asked: [next.key]
+      };
+      const label =
+        next.key === "categorie" ? "categorie" :
+        next.key === "sexe" ? "sexe" :
+        next.key === "tailles" ? "taille" :
+        next.key;
+      const reply = `J'ai trouve pas mal d'options. Tu preferes quelle ${label} : ${next.options.join(", ")} ? Tu peux aussi donner l'ID produit ou magasin.`;
+      await typeText(textNode, reply);
+      speak(reply);
+      return;
+    }
+    await showSuggestions(baseList, bot, "Voici 2 a 3 suggestions qui correspondent :");
+    return;
+  }
+
+  await showSuggestions(baseList, bot, "Voici 2 a 3 suggestions qui correspondent :");
+  return;
+}
+function sendMessage(){
+  const text=input.value.trim();
+  if(!text) return;
+  const userMsg=document.createElement("div");
+  userMsg.className="chat-message user";
+  userMsg.innerHTML=`<i class="fas fa-user icon"></i>${text}`;
+  messagesContainer.appendChild(userMsg);
+  input.value="";
+  const loading=document.createElement("div");
+  loading.className="loading";
+  loading.innerHTML=`<span></span><span></span><span></span>`;
+  messagesContainer.appendChild(loading);
+  messagesContainer.scrollTop=messagesContainer.scrollHeight;
+  setTimeout(()=>repondre(text,loading),900);
+}
+window.sendMessage=sendMessage;
+
+function goHome(){ window.location.href="./explorer.html"; }
+window.goHome=goHome;
+
+function distanceLevenshtein(a,b){ const matrix=[]; for(let i=0;i<=b.length;i++) matrix[i]=[i]; for(let j=0;j<=a.length;j++) matrix[0][j]=j; for(let i=1;i<=b.length;i++){ for(let j=1;j<=a.length;j++){ if(b.charAt(i-1)===a.charAt(j-1)) matrix[i][j]=matrix[i-1][j-1]; else matrix[i][j]=Math.min(matrix[i-1][j-1]+1,matrix[i][j-1]+1,matrix[i-1][j]+1);}} return matrix[b.length][a.length]; }
+</script>
+</body>
+</html>

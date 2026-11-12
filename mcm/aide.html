@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centre d'Aide | MyCityMall</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles/indexstyle.css">
+    <style>
+        .help-section { padding: 40px 5%; max-width: 1000px; margin: 0 auto; }
+        .help-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 30px; }
+        .help-card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-left: 5px solid #ff4d6d; }
+        .help-card i { font-size: 1.5rem; color: #ff4d6d; margin-bottom: 15px; }
+        .help-card h3 { margin-bottom: 10px; color: #2d3436; }
+        .help-card p { font-size: 0.95rem; color: #636e72; line-height: 1.5; }
+        .status-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; background: #e3f2fd; color: #1976d2; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<section class="help-section">
+    <h1><i class="fa-solid fa-circle-question"></i> Centre d'Aide & Guide Utilisateur</h1>
+    <p>Tout ce que vous devez savoir pour profiter pleinement de MyCityMall.</p>
+
+    <div class="help-grid">
+        <div class="help-card">
+            <span class="status-badge">Navigation</span>
+            <i class="fa-solid fa-compass"></i>
+            <h3>Explorer le Mall</h3>
+            <p>Cliquez sur le bouton <strong>Explorer</strong> pour accéder à l'univers virtuel. Vous y trouverez les catégories de produits et les boutiques locales.</p>
+        </div>
+
+        <div class="help-card">
+            <span class="status-badge">Compte</span>
+            <i class="fa-solid fa-user-gear"></i>
+            <h3>Gestion du Profil</h3>
+            <p>Via l'icône profil, vous pouvez vous connecter ou créer un compte pour sauvegarder vos commandes. Une fois connecté, votre nom et email s'afficheront dans le menu.</p>
+        </div>
+
+        <div class="help-card">
+            <span class="status-badge">Achat</span>
+            <i class="fa-solid fa-cart-shopping"></i>
+            <h3>Le Panier & Commandes</h3>
+            <p>Le badge rose sur l'icône panier indique le nombre d'articles. En cliquant dessus, vous verrez les détails de votre dernière commande enregistrée sur votre compte.</p>
+        </div>
+
+        <div class="help-card" style="grid-column: span 1; height: auto;">
+    <span class="status-badge">Support</span>
+    <i class="fa-solid fa-circle-exclamation"></i>
+    <h3>Faire une réclamation</h3>
+    <p style="margin-bottom: 15px;">Un problème avec une commande ? Remplissez ce formulaire pour contacter notre support technique.</p>
+    
+    <form action="https://formspree.io/f/xeeeadvy" method="POST" id="form-reclamation">
+        <div style="margin-bottom: 10px;">
+            <input type="text" name="nom" placeholder="Votre nom complet" required 
+                   style="width:100%; padding:8px; border-radius:5px; border:1px solid #ddd;">
+        </div>
+        <div style="margin-bottom: 10px;">
+            <input type="email" name="email" placeholder="Votre email" required 
+                   style="width:100%; padding:8px; border-radius:5px; border:1px solid #ddd;">
+        </div>
+        <div style="margin-bottom: 10px;">
+            <textarea name="message" placeholder="Détails de votre réclamation..." rows="4" required 
+                      style="width:100%; padding:8px; border-radius:5px; border:1px solid #ddd; resize: none;"></textarea>
+        </div>
+        <button type="submit" class="btn-seller" style="border:none; cursor:pointer; font-size: 0.9rem; padding: 10px;">
+            Envoyer la réclamation
+        </button>
+    </form>
+</div>
+
+        <div class="help-card">
+            <span class="status-badge">FAQ</span>
+            <i class="fa-solid fa-lightbulb"></i>
+            <h3>Questions Fréquentes</h3>
+            <p>Retrouvez les réponses sur les délais de livraison au Maroc et les modes de paiement acceptés par nos boutiques partenaires.</p>
+        </div>
+
+        <div class="help-card">
+            <span class="status-badge">Business</span>
+            <i class="fa-solid fa-store"></i>
+            <h3>Devenir Vendeur</h3>
+            <p>Utilisez le bouton "Ouvrir ma boutique" pour remplir le formulaire de candidature. Nous acceptons la mode, l'électronique, le sport et la beauté.</p>
+        </div>
+    </div>
+
+    <div style="margin-top: 40px; text-align: center;">
+        <a href="../index.html" class="btn-explorer">Retour à l'accueil</a>
+    </div>
+</section>
+
+</body>
+</html>

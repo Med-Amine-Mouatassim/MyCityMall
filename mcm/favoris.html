@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mes Favoris - MyCityMall</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* --- Styles inchangés de ton code actuel --- */
+:root {
+    --primary-cyan: #00bcd4;
+    --dark-bg: #121212;
+    --card-bg: #1e1e1e;
+    --accent-pink: #ff4d6d;
+    --text-gray: #b0b0b0;
+    --white: #ffffff;
+}
+body { 
+    background-color: var(--dark-bg); 
+    font-family: 'Inter', sans-serif; 
+    color: var(--white); 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    margin: 0; 
+    min-height: 100vh;
+    background-image: url('./photos/favorite2.0.png'); 
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+}
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: -1;
+}
+header { width: 100%; padding: 20px; box-sizing: border-box; }
+.btn-back {
+    text-decoration: none; color: var(--primary-cyan); border: 1px solid var(--primary-cyan);
+    padding: 10px 22px; border-radius: 50px; font-weight: 600; display: inline-flex;
+    align-items: center; gap: 10px; transition: all 0.3s ease;
+}
+.btn-back:hover {
+    background: var(--primary-cyan); color: var(--dark-bg);
+    box-shadow: 0 0 15px rgba(0, 188, 212, 0.4);
+}
+h1 { text-align: center; margin: 40px 0; color: var(--accent-pink); text-transform: uppercase; letter-spacing: 3px; font-size: 2.5rem; text-shadow: 2px 2px 10px rgba(255, 77, 109, 0.2);}
+#favoritesGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; max-width: 1200px; margin: 0 auto; }
+.shop-card { background: var(--card-bg); border-radius: 20px; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; border: 1px solid #333; display: flex; flex-direction: column; }
+.shop-card:hover { transform: translateY(-10px); box-shadow: 0 10px 25px rgba(0,0,0,0.5); border-color: var(--accent-pink); }
+.shop-card img { width: 100%; height: 180px; object-fit: cover; border-bottom: 2px solid var(--accent-pink); }
+.shop-info { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; }
+.shop-info h3 { margin: 0 0 10px 0; font-size: 1.4rem; color: var(--white); }
+.btn-visit { display: block; text-align: center; text-decoration: none; background: linear-gradient(45deg, var(--primary-cyan), #008ba3); color: #121212; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: auto; transition: opacity 0.3s;}
+.btn-visit:hover { opacity: 0.9; letter-spacing: 1px; }
+.no-favs, .error { text-align: center; grid-column: 1 / -1; padding: 50px; background: rgba(255, 255, 255, 0.05); border-radius: 15px; color: var(--text-gray); font-style: italic; }
+
+#preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #ffffff; display: flex; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.5s ease, visibility 0.5s ease; }
+#preloader.hidden { opacity: 0; visibility: hidden; }
+.loader { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* Responsive */
+/* Pour les téléphones (max-width: 600px) : 2 cartes par ligne */
+@media (max-width: 600px) {
+    #favoritesGrid {
+        grid-template-columns: repeat(2, 1fr) !important; /* 2 cartes par ligne */
+        padding: 10px;
+        gap: 15px;
+    }
+
+    h1 {
+        font-size: 1.6rem;
+        margin: 20px 0;
+    }
+
+    .shop-card img {
+        height: 120px; /* ajustement des images pour petits écrans */
+    }
+
+    .shop-info h3 {
+        font-size: 1rem;
+    }
+
+    .shop-info p {
+        font-size: 0.8rem;
+    }
+
+    header {
+        padding: 10px;
+        display: flex;
+        justify-content: center;
+    }
+}
+
+</style>
+</head>
+<body>
+
+<div id="preloader"><div class="loader"></div></div>
+
+<header>
+    <a href="./explorer.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Retour à l'accueil</a>
+</header>
+
+<h1><i class="fa-solid fa-heart"></i> Mes Favoris</h1>
+
+<div id="favoritesGrid"></div>
+
+<script type="module">
+import { auth, db } from './config/firebase-config.js';
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+const MIN_LOADING_TIME = 800;
+const startTime = Date.now();
+window.addEventListener('load', () => {
+    const elapsedTime = Date.now() - startTime;
+    setTimeout(() => { document.getElementById('preloader').classList.add('hidden'); }, Math.max(0, MIN_LOADING_TIME - elapsedTime));
+});
+
+async function loadFavorites(user) {
+    const favoritesGrid = document.getElementById('favoritesGrid');
+    if (!favoritesGrid) return;
+
+    favoritesGrid.innerHTML = '<p>Chargement de vos favoris...</p>';
+
+    try {
+        const userDoc = await getDoc(doc(db, "utilisateurs", user.uid));
+        if (!userDoc.exists() || !userDoc.data().favoris || userDoc.data().favoris.length === 0) {
+            favoritesGrid.innerHTML = '<p class="no-favs">Vous n\'avez pas encore de favoris.</p>';
+            return;
+        }
+
+        const favoriteIds = userDoc.data().favoris;
+
+        // ⚡ Charger tous les magasins depuis tous les fichiers JSON
+        const categories = ['sport', 'electro']; // ajoute d'autres catégories si nécessaire
+        let allShops = [];
+
+        for (let cat of categories) {
+            try {
+                const res = await fetch(`../${cat}/${cat}.json`);
+                const data = await res.json();
+                allShops = allShops.concat(data);
+            } catch(e) { console.warn(`Impossible de charger ${cat}.json`, e); }
+        }
+
+        const favoritesData = allShops.filter(shop => favoriteIds.includes(shop.id_magasin));
+
+        favoritesGrid.innerHTML = "";
+
+        if (favoritesData.length === 0) {
+            favoritesGrid.innerHTML = '<p class="no-favs">Aucun magasin correspondant trouvé.</p>';
+            return;
+        }
+
+        favoritesData.forEach(shop => {
+            const card = document.createElement('div');
+            card.className = 'shop-card';
+            card.innerHTML = `
+                <img src="${shop.image}" alt="${shop.nom}">
+                <div class="shop-info">
+                    <h3>${shop.nom}</h3>
+                    <a href="../${shop.categorie}/catalogue.html?shop=${shop.id_magasin}" class="btn-visit">VOIR MAGASIN</a>
+                </div>`;
+            favoritesGrid.appendChild(card);
+        });
+
+    } catch(error) {
+        console.error("Erreur lors du chargement des favoris :", error);
+        favoritesGrid.innerHTML = '<p class="error">Erreur lors du chargement.</p>';
+    }
+}
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        loadFavorites(user);
+    } else {
+        window.location.href = '../mcm/login.html';
+    }
+});
+</script>
+
+</body>
+</html>

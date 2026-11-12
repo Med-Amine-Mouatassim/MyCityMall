@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyCityMall - Explorateur</title>
+    <link rel="stylesheet" href="styles/explorer.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="explorer-body">
+    <div id="preloader">
+  <div class="loader"></div>
+</div>
+ <div class="video-background">
+    <video autoplay muted loop playsinline id="bgVideo">
+        <source src="./photos/vd background.mp4" type="video/mp4">
+    </video>
+    <div class="overlay"></div>
+</div>
+
+<style>
+    .video-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        overflow: hidden;
+    }
+
+    #bgVideo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Remplit l'écran sans déformer */
+    }
+
+    .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6); /* Voile sombre pour la lisibilité */
+    }
+</style>
+
+
+
+  <nav class="navbar">
+    <div class="nav-left">
+        <a href="../index.html" class="icon-link" style="font-size: 1rem; text-decoration: none; color: ivory;">
+            <i class="fa-solid fa-house"></i> Accueil
+        </a>
+        
+    </div>
+
+   
+
+    <div class="nav-tools">
+        <div class="icons">
+            <div class="profile-container">
+                <a href="#" class="icon-link profile">
+                    <i class="fa-solid fa-user" style="color: aliceblue;"></i>
+                </a>
+                <div class="profile-dropdown">
+                    <div id="user-logged-in" style="display: none;">
+                        <div class="dropdown-header">
+                            <p id="user-full-name" style="color: #ff4d6d; font-size: 1.1rem; margin: 0;"></p>
+                            <p id="user-email" style="font-size: 0.8rem; color: #343a3c; margin: 5px 0 0 0;"></p>
+                        </div>
+                        <hr>
+                        <a href="vendeur.html" class="dropdown-item"><i class="fa-solid fa-user-gear">
+                            
+                        </i> Mon Profil</a>
+                        <a href="#" id="logout-btn" class="dropdown-item"><i class="fa-solid fa-right-from-bracket"></i> Se déconnecter</a>
+                    </div>
+
+                    <div id="user-guest">
+                        <div class="dropdown-header">
+                            <p style="margin: 0;">Bienvenue !</p>
+                        </div>
+                        <hr>
+                        <a href="login.html" class="dropdown-item"><i class="fa-solid fa-right-to-bracket"></i> Se connecter</a>
+                        <a href="register.html" class="dropdown-item"><i class="fa-solid fa-user-plus"></i> Créer un compte</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+    <main class="explorer-container">
+        <h1 class="main-title">Bienvenue dans MyCityMall</h1>
+
+        <div class="nodes-wrapper">
+            <div class="category-node" onclick="window.location.href='../sport/sport.html'">
+                <div class="node-circle sport"></div>
+                <span>Sport</span>
+            </div>
+            <div class="category-node" onclick="window.location.href='../electro/electro.html'">
+                <div class="node-circle electro"></div>
+                <span>Électro</span>
+            </div>
+            <div class="category-node" onclick="window.location.href='../beaute/beaute.html'">
+                <div class="node-circle beaute"></div>
+                <span>Beauté</span>
+            </div>
+            <div class="category-node" onclick="window.location.href='../fashion/fashion.html'">
+                <div class="node-circle fashion"></div>
+                <span>Fashion</span>
+            </div>
+            <div class="category-node" onclick="window.location.href='../autres/autres.html'">
+                <div class="node-circle autres"></div>
+                <span>Vintage</span>
+            </div>
+             <div class="category-node" onclick="window.location.href='../promo/promo.html'">
+                <div class="node-circle promo"></div>
+                <span>Promotion</span>
+            </div>
+        </div>
+
+        <div class="bottom-actions">
+            <button class="action-btn cyan" onclick="window.location.href='../index.html'">EXPLORER LE MALL</button>
+            <button class="action-btn purple" onclick="window.location.href='favoris.html'">VOIR MES FAVORIS</button>
+            <button class="action-btn red" onclick="window.location.href='chatbot.html'"> 🤖 Assistant</button>
+        </div>
+    </main>
+
+    <script>// On définit le délai minimum en millisecondes (ex: 800ms)
+const MIN_LOADING_TIME = 800;
+const startTime = Date.now();
+
+window.addEventListener('load', function() {
+    const currentTime = Date.now();
+    const elapsedTime = currentTime - startTime;
+    
+    // On calcule s'il reste du temps à attendre
+    const remainingTime = Math.max(0, MIN_LOADING_TIME - elapsedTime);
+
+    setTimeout(() => {
+        const preloader = document.getElementById('preloader');
+        preloader.classList.add('hidden'); // Déclenche le fondu CSS
+    }, remainingTime);
+});</script>
+
+    <footer class="main-footer">
+    <div class="footer-container">
+        <div class="footer-col">
+            <div class="footer-logo">
+                <img src="./photos/MCM logo.png" alt="MCM Logo">
+                <span>MyCityMall</span>
+            </div>
+            <p>Le premier centre commercial virtuel au Maroc. Une expérience shopping immersive unique en son genre.</p>
+            <div class="social-icons">
+                <a href="#"><i class="fa-brands fa-facebook"></i></a>
+                <a href="https://www.instagram.com/mycitymall_?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="><i class="fa-brands fa-instagram"></i></a>
+                <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+                <a href="#"><i class="fa-brands fa-linkedin"></i></a>
+            </div>
+        </div>
+
+        <div class="footer-col">
+            <h4>Explorer</h4>
+            <ul>
+                <li><a href="../index.html">Accueil</a></li>
+                <li><a href="explorer.html">Toutes les catégories</a></li>
+                <li><a href="#">Vendeurs vedettes</a></li>
+                <li><a href="#">Nouveautés</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-col">
+            <h4>Aide & Support</h4>
+            <ul>
+                <li><a href="aide.html"><i class="fa-solid fa-envelope"></i> Reclamation</a></li>
+                <li><a href="aide.html"><i class="fa-solid fa-phone"></i> Support</a></li>
+                <li><a href="aide.html"><i class="fa-solid fa-circle-question"></i> FAQ</a></li>
+                <li><a href="aide.html"><i class="fa-solid fa-shield-halved"></i> CGU & Confidentialité</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-col">
+            <h4>Votre avis compte</h4>
+            <p>Aidez-nous à nous améliorer.</p>
+            <button class="btn-feedback">Donner mon avis</button>
+            <div class="rating-display">
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star-half-stroke"></i>
+                <span>4.5/5</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer-bottom">
+        <p>&copy; 2026 MyCityMall - Tous droits réservés.</p>
+    </div>
+</footer>
+
+    <script type="module" src="scripts/indexjs.js"></script>
+
+
+
+ 
+
+
+
+</body>
+</html>

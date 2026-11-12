@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyCityMall - Connexion</title>
+    <link rel="stylesheet" href="styles/indexstyle.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* On réutilise les mêmes styles que register pour la cohérence */
+        .auth-container { display: flex; justify-content: center; align-items: center; height: 90vh; background: #f8f9fa; }
+        .auth-card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        .auth-card h2 { margin-bottom: 20px; color: #2d3436; text-align: center; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 5px; color: #636e72; }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; }
+        .auth-btn { width: 100%; padding: 12px; background: #ff4d6d; border: none; color: white; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+        .auth-btn:hover { background: #ff7e5f; }
+        .error-msg { color: #d63031; font-size: 0.85rem; margin-bottom: 10px; display: none; }
+        .auth-footer { text-align: center; margin-top: 15px; font-size: 0.9rem; }
+        .auth-footer a { color: #ff4d6d; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <h2>Connexion</h2>
+            <div id="errorMsg" class="error-msg">Email ou mot de passe incorrect.</div>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" required placeholder="exemple@mail.com">
+                </div>
+                <div class="input-group">
+                    <label>Mot de passe</label>
+                    <input type="password" id="loginPassword" required placeholder="********">
+                </div>
+                <button type="submit" class="auth-btn">Se connecter</button>
+            </form>
+            <div class="auth-footer">
+                Pas de compte ? <a href="register.html">Créer un compte</a>
+            </div>
+        </div>
+    </div>
+     <script type="module" src="scripts/auth.js"></script>
+    
+</body>
+</html>
